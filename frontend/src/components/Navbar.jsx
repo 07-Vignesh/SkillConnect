@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FaBars, FaTimes } from "react-icons/fa";
+import { UserButton, useUser } from "@clerk/clerk-react";
 
-function Navbar({ isLoggedIn, onLoginToggle }) {
+function Navbar() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const { isSignedIn } = useUser(); // 👈 Clerk hook
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -32,12 +34,18 @@ function Navbar({ isLoggedIn, onLoginToggle }) {
           <Link to="/pp" className="text-gray-700 hover:text-indigo-600 transition">
             Privacy Policy
           </Link>
-          <button
-            onClick={onLoginToggle}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow"
-          >
-            {isLoggedIn ? "Logout" : "Login"}
-          </button>
+
+          {/* Auth buttons */}
+          {!isSignedIn ? (
+            <Link
+              to="/login"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow"
+            >
+              Login
+            </Link>
+          ) : (
+            <UserButton afterSignOutUrl="/" />
+          )}
         </nav>
 
         {/* Mobile Hamburger */}
@@ -62,36 +70,28 @@ function Navbar({ isLoggedIn, onLoginToggle }) {
                 Home
               </Link>
             )}
-            <Link
-              to="/aboutus"
-              className="text-gray-700 hover:text-indigo-600 transition"
-              onClick={toggleMenu}
-            >
+            <Link to="/aboutus" className="text-gray-700 hover:text-indigo-600 transition" onClick={toggleMenu}>
               About
             </Link>
-            <Link
-              to="/contact"
-              className="text-gray-700 hover:text-indigo-600 transition"
-              onClick={toggleMenu}
-            >
+            <Link to="/contact" className="text-gray-700 hover:text-indigo-600 transition" onClick={toggleMenu}>
               Contact
             </Link>
-            <Link
-              to="/pp"
-              className="text-gray-700 hover:text-indigo-600 transition"
-              onClick={toggleMenu}
-            >
+            <Link to="/pp" className="text-gray-700 hover:text-indigo-600 transition" onClick={toggleMenu}>
               Privacy Policy
             </Link>
-            <button
-              onClick={() => {
-                onLoginToggle();
-                toggleMenu();
-              }}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow"
-            >
-              {isLoggedIn ? "Logout" : "Login"}
-            </button>
+
+            {/* Mobile auth buttons */}
+            {!isSignedIn ? (
+              <Link
+                to="/login"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow"
+                onClick={toggleMenu}
+              >
+                Login
+              </Link>
+            ) : (
+              <UserButton afterSignOutUrl="/" />
+            )}
           </nav>
         </div>
       )}

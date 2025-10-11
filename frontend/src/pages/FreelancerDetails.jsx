@@ -1,109 +1,165 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-
-const freelancers = [
-  { id: 1, name: "Arjun Kumar", price: "₹500", category: "Web Development" },
-  { id: 2, name: "Priya Sharma", price: "₹400", category: "Graphic Design" },
-  { id: 3, name: "Ravi Patel", price: "₹350", category: "Content Writing" },
-];
+import { useUser } from "@clerk/clerk-react";
 
 export default function FreelancerDetails() {
-  const { id } = useParams();
-  const freelancer = freelancers.find((f) => f.id === parseInt(id));
-  const [showBooking, setShowBooking] = useState(false);
-  const [booked, setBooked] = useState(false);
-  const [isNewClient, setIsNewClient] = useState(true);
+  const { id } = useParams(); // freelancer MongoDB ID
+  const { user } = useUser(); // logged-in user from Clerk
 
+  const [freelancer, setFreelancer] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [booking, setBooking] = useState(null);
+  const [error, setError] = useState("");
+
+  // ✅ Fetch freelancer details
   useEffect(() => {
-    const clientStatus = localStorage.getItem("isReturningClient");
-    if (clientStatus === "true") setIsNewClient(false);
-  }, []);
+    if (!id) return;
 
-  if (!freelancer)
-    return <p className="text-center mt-20 text-gray-600">Freelancer not found.</p>;
+    const fetchFreelancer = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/freelancers/${id}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Freelancer not found");
+        setFreelancer(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleBooking = (e) => {
+    fetchFreelancer();
+  }, [id]);
+
+  // ✅ Handle booking submission
+  const handleBooking = async (e) => {
     e.preventDefault();
-    localStorage.setItem("isReturningClient", "true");
-    setBooked(true);
+    setError("");
+
+    if (!user) {
+      setError("Please login to book a freelancer.");
+      return;
+    }
+
+    const clientName = user.fullName || e.target.name.value.trim();
+    const clientEmail = user.emailAddresses?.[0]?.emailAddress;
+    const projectDetails = e.target.details.value.trim();
+    const advanceFee = Number(e.target.advanceFee.value) || 0;
+
+    if (!projectDetails || !advanceFee) {
+      setError("All fields are required");
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/bookings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          freelancerId: id,
+          clientId: user.id, // Clerk user ID
+          clientName,
+          clientEmail,
+          projectDetails,
+          advanceFee,
+          status: "pending",
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Booking failed");
+      setBooking(data);
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
+  // ✅ Cancel booking
+  const cancelBooking = async () => {
+    if (!booking?._id) return;
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/bookings/${booking._id}/cancel`,
+        { method: "PUT" }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Cancel failed");
+      setBooking(null);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  if (loading) return <p>Loading freelancer...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+  if (!freelancer) return <p>Freelancer not found</p>;
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-8 sm:p-10">
-        {/* Header */}
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">{freelancer.name}</h1>
-        <p className="text-indigo-600 font-medium mt-1">{freelancer.category}</p>
-        <p className="text-xl sm:text-2xl font-semibold mt-4">Starting at {freelancer.price}</p>
+    <div className="min-h-screen bg-gray-50 py-12 px-6">
+      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+        <h1 className="text-3xl font-bold">{freelancer.name}</h1>
+        <p className="text-indigo-600">{freelancer.category}</p>
+        <p className="text-xl font-semibold mt-4">Starting at ₹{freelancer.price}</p>
+        <p className="mt-2 text-gray-600">
+          {freelancer.city} - {freelancer.pincode}
+        </p>
 
-        {/* About */}
-        <div className="mt-6">
-          <h2 className="text-2xl font-semibold text-gray-800">About</h2>
-          <p className="mt-2 text-gray-700">
-            Experienced {freelancer.category} specialist with a proven track record of delivering high-quality work for clients.
-          </p>
-        </div>
+        {error && <p className="text-red-500 mt-4">{error}</p>}
 
-        {/* Booking Button */}
-        {!showBooking && !booked && (
-          <button
-            onClick={() => setShowBooking(true)}
-            className="mt-8 w-full btn btn-primary hover:scale-105 transition-transform duration-300"
-          >
-            Book Now
-          </button>
-        )}
-
-        {/* Booking Form */}
-        {showBooking && !booked && (
-          <div className="mt-8 p-6 border rounded-xl bg-gray-50 shadow-sm">
-            <h2 className="text-xl sm:text-2xl font-bold mb-4">Book {freelancer.name}</h2>
-            <form onSubmit={handleBooking} className="grid gap-4">
-              <input
-                type="text"
-                placeholder="Your Name"
-                className="input input-bordered w-full"
-                required
-              />
-              <input
-                type="email"
-                placeholder="Your Email"
-                className="input input-bordered w-full"
-                required
-              />
-              <textarea
-                placeholder="Project Details"
-                className="textarea textarea-bordered w-full"
-                required
-              ></textarea>
-
-              {/* Advance Fee for New Clients */}
-              {isNewClient && (
-                <select className="select select-bordered w-full" required>
-                  <option value="">Select Advance Fee</option>
-                  <option value="19">₹19</option>
-                  <option value="29">₹29</option>
-                  <option value="49">₹49</option>
-                </select>
-              )}
-
-              <button type="submit" className="btn btn-success w-full hover:scale-105 transition-transform duration-300">
-                Confirm Booking
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* Booking Confirmation */}
-        {booked && (
-          <div className="mt-8 p-6 bg-green-50 border border-green-300 rounded-xl text-center shadow-sm">
-            <h2 className="text-xl sm:text-2xl font-bold text-green-700">🎉 Booking Confirmed!</h2>
-            <p className="mt-2 text-gray-700">
-              You’ve successfully booked {freelancer.name}.
-              {isNewClient
-                ? " Advance fee paid. Welcome aboard!"
-                : " Since you’re a returning client, no advance fee required."}
+        {!booking ? (
+          <form onSubmit={handleBooking} className="mt-8 grid gap-4">
+            {!user && (
+              <>
+                <input
+                  name="name"
+                  placeholder="Your Name"
+                  required
+                  className="border p-2 rounded"
+                />
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="Your Email"
+                  required
+                  className="border p-2 rounded"
+                />
+              </>
+            )}
+            <textarea
+              name="details"
+              placeholder="Project Details"
+              required
+              className="border p-2 rounded"
+            ></textarea>
+            <select name="advanceFee" required className="border p-2 rounded">
+              <option value="">Select Advance Fee</option>
+              <option value="19">₹19</option>
+              <option value="29">₹29</option>
+              <option value="49">₹49</option>
+            </select>
+            <button
+              type="submit"
+              className="bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
+            >
+              Confirm Booking
+            </button>
+          </form>
+        ) : (
+          <div className="mt-6 p-6 bg-green-100 rounded-lg">
+            <h2 className="text-xl font-bold text-green-700">🎉 Booking Confirmed!</h2>
+            <p className="mt-2">
+              You’ve successfully booked <strong>{freelancer.name}</strong>.
             </p>
+            <p className="mt-2 text-gray-700">
+              Advance Paid: ₹{booking.advanceFee}
+            </p>
+            <button
+              onClick={cancelBooking}
+              className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+            >
+              Cancel Booking
+            </button>
           </div>
         )}
       </div>
