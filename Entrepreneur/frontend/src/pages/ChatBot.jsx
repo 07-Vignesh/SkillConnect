@@ -20,7 +20,7 @@ const ChatBot = ({ sendMessage }) => {
   }, [messages]);
 
   // ================= PARSER =================
-  const parseFreelancers = (text) => {
+  const parseFreelancerss = (text) => {
     const results = [];
 
     freelancersData.forEach((freelancer) => {
@@ -50,7 +50,7 @@ const ChatBot = ({ sendMessage }) => {
       const newMessages = [];
 
       if (botResponse.freelancer_answer) {
-        const parsed = parseFreelancers(botResponse.freelancer_answer);
+        const parsed = parseFreelancerss(botResponse.freelancer_answer);
 
         newMessages.push({
           sender: "bot",
