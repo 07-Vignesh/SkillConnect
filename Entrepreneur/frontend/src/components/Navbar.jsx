@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { UserButton, useUser } from "@clerk/clerk-react";
-import unitoidsLogo from "../assets/logo1-reduced size.png";
+import skillconnectLogo from "../assets/logo2.png";
 import { Button } from "@/components/ui/button";
 
 function Navbar() {
@@ -38,9 +38,9 @@ useEffect(() => {
         {/* 🔥 LOGO */}
         <Link to="/" className="flex items-center">
           <img
-            src={unitoidsLogo}
-            alt="Unitoids"
-            className="h-14 md:h-[84px] w-auto object-contain -ml-1 -mt-2"
+            src={skillconnectLogo}
+            alt="SkillConnect"
+            className="h-20 md:h-20 w-auto scale-150 object-contain"
           />
         </Link>
 

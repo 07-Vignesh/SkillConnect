@@ -16,7 +16,7 @@ function AboutUs() {
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white">
           About{" "}
           <span className="bg-gradient-to-r from-gray-200 via-gray-400 to-gray-500 bg-clip-text text-transparent">
-            Unitoids
+            SkillConnect
           </span>
         </h1>
 
@@ -32,7 +32,7 @@ function AboutUs() {
           <h2 className="text-3xl font-bold text-white">Our Story</h2>
 
           <p className="mt-6 text-gray-400 leading-relaxed text-lg">
-            Unitoids was built to empower students and part-time workers.
+            SkillConnect was built to empower students and part-time workers.
             We saw the struggles of high fees on other platforms and decided
             to create a system with fast payments and fair opportunities.
           </p>
@@ -142,7 +142,7 @@ function AboutUs() {
 
       {/* ================= FOOTER ================= */}
       <footer className="relative z-10 text-center py-6 text-gray-500">
-        © 2026 Unitoids. All rights reserved.
+        © 2026 SkillConnect. All rights reserved.
       </footer>
     </div>
   );

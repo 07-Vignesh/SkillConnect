@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
-// Pages
 import HomePage from "./pages/HomePage.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
 import ServicesPage from "./pages/ServicesPage.jsx";
@@ -19,58 +18,58 @@ import MyBookings from "./pages/MyBookings.jsx";
 import FreelancerLogin from "./pages/FreelancerLogin.jsx";
 import LoginPage from "./pages/Login.jsx";
 import UserBookings from "./pages/UserBookings.jsx";
-// Clerk
 import { SignIn, SignUp, UserButton } from "@clerk/clerk-react";
-
-// Components
 import Navbar from "./components/Navbar.jsx";
+import ChatBot from "./pages/ChatBot.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   useEffect(() => {
     document.documentElement.classList.add("dark");
   }, []);
 
+  // ✅ unique session per browser tab
+  const sessionId = useState(() => `session-${Date.now()}`)[0];
+
+  const sendMessage = async (message) => {
+    const response = await fetch("http://localhost:8000/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "Vishnu@2004",
+        "x-session-id": sessionId,  // ✅ for memory
+      },
+      body: JSON.stringify({ message }),
+    });
+    const data = await response.json();
+    return data;
+  };
+
   return (
     <Router>
-      {/* Navbar */}
-      <Navbar
-        isLoggedIn={isLoggedIn}
-        onLoginToggle={() => setIsLoggedIn(!isLoggedIn)}
-      />
+      <Navbar isLoggedIn={isLoggedIn} onLoginToggle={() => setIsLoggedIn(!isLoggedIn)} />
       <Toaster />
-      {/* All Routes */}
+      <ChatBot sendMessage={sendMessage} />
       <Routes>
-        {/* Public Pages */}
         <Route path="/" element={<HomePage isLoggedIn={isLoggedIn} />} />
         <Route path="/aboutus" element={<AboutUs />} />
         <Route path="/services" element={<ServicesPage />} />
-        
         <Route path="/contact" element={<Contact />} />
         <Route path="/pp" element={<PrivacyPolicy />} />
         <Route path="/categories" element={<CategoryPage />} />
         <Route path="/non-technical" element={<NonTechnicalServices />} />
-
-        {/* Auth Pages */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/freelancer-login" element={<FreelancerLogin />} />
         <Route path="/freelancer-signup" element={<FreelancerSignup />} />
-
-        {/* Freelancer Pages */}
         <Route path="/profile-setup" element={<ProfileSetup />} />
         <Route path="/freelancer-dashboard" element={<FreelancerDashboard />} />
         <Route path="/freelancer-profile" element={<FreelancerProfile />} />
-        <Route path="/UserBooking" element={<UserBookings/>} />
-
-
-        {/* Bookings */}
+        <Route path="/UserBooking" element={<UserBookings />} />
         <Route path="/my-bookings" element={<MyBookings />} />
-
-        {/* Freelancer Listing & Details */}
         <Route path="/freelancers/:categoryName" element={<Flproductcard />} />
         <Route path="/freelancer/:id" element={<FreelancerDetails />} />
         <Route path="/freelancer/:id/dashboard" element={<FreelancerDashboard />} />
-
       </Routes>
     </Router>
   );

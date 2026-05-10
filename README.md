@@ -1,6 +1,6 @@
-# 🚀 Unitoids – AI Powered Freelancing Platform
+# 🚀 SkillConnect – AI Powered Freelancing Platform
 
-Unitoids is a modern AI-driven freelancing platform that connects **clients and freelancers** (both technical & non-technical) with smart recommendations, real-time chat assistance, and location-based discovery.
+SkillConnect is a modern AI-driven freelancing platform that connects **clients and freelancers** (both technical & non-technical) with smart recommendations, real-time chat assistance, and location-based discovery.
 
 ---
 
@@ -87,8 +87,8 @@ FreeLancers-Website/
 ### 1️⃣ Clone Repository
 
 ```
-git clone https://github.com/Ahamedin/Unitoids.git
-cd Unitoids
+git clone https://github.com/Ahamedin/SkillConnect.git
+cd SkillConnect
 ```
 
 ---
@@ -165,7 +165,7 @@ python create_vectorstore.py
 
 ## 📌 Conclusion
 
-Unitoids is designed to bridge the gap between talent and opportunity using **AI-powered intelligence**, making freelancing smarter, faster, and more accessible.
+SkillConnect is designed to bridge the gap between talent and opportunity using **AI-powered intelligence**, making freelancing smarter, faster, and more accessible.
 
 ---
 

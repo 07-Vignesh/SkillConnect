@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.prompts import PromptTemplate
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_core.prompts import PromptTemplate  # ✅ fixed import
 
 # Load environment variables
 load_dotenv()
@@ -51,8 +51,7 @@ Answer clearly:
 )
 
 def ask_question(query):
-
-    docs = retriever.get_relevant_documents(query)
+    docs = retriever.invoke(query)  # ✅ get_relevant_documents is deprecated
 
     context = "\n".join([doc.page_content for doc in docs])
 

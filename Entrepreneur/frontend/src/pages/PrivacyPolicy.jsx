@@ -30,7 +30,7 @@ function PrivacyPolicy() {
             {
               title: "1. Introduction",
               content:
-                "At Unitoids, we value your privacy. This policy explains how we handle your personal information when you use our platform.",
+                "At SkillConnect, we value your privacy. This policy explains how we handle your personal information when you use our platform.",
             },
             {
               title: "2. Information We Collect",
@@ -66,7 +66,7 @@ function PrivacyPolicy() {
                 <>
                   You can access, update, or delete your data anytime via{" "}
                   <span className="text-primary font-semibold">
-                    support@unitoids.com
+                    support@SkillConnect.com
                   </span>
                 </>
               ),
@@ -79,8 +79,8 @@ function PrivacyPolicy() {
             {
               title: "8. Contact",
               content: [
-                "Email: support@unitoids.com",
-                "Phone: +91 98765 43210",
+                "Email: support@SkillConnect.com",
+                "Phone: +91 8925615178",
               ],
             },
           ].map((section, i) => (
@@ -112,7 +112,7 @@ function PrivacyPolicy() {
 
       {/* ================= FOOTER ================= */}
       <footer className="text-center py-8 text-gray-500 text-sm relative z-10 border-t border-white/10">
-        © 2026 Unitoids. All rights reserved.
+        © 2026 SkillConnect. All rights reserved.
       </footer>
     </div>
   );

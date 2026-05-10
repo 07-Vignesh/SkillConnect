@@ -12,10 +12,12 @@ for f in freelancers:
     text = f"""
 Name: {f['name']}
 Category: {f['category']}
-City: {f.get('city','N/A')}
-Price: {f['price']}
-Rating: {f.get('averageRating',0)}
-Projects: {len(f.get('projects',[]))}
+Subcategory: {f.get('subcategory', 'N/A')}
+City: {f.get('location', {}).get('city', 'N/A')}
+Price: {f.get('pricing', {}).get('amount', 'N/A')}
+Rating: {f.get('rating', 0)}
+Completed Jobs: {f.get('completedJobs', 0)}
+Skills: {', '.join(f.get('skills', []))}
 """
     docs.append(text)
 
