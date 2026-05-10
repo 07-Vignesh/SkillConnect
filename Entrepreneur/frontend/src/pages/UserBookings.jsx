@@ -22,7 +22,7 @@ export default function UserBookings() {
         const data = await res.json();
         setBookings(data);
       } catch (err) {
-        console.error(err);
+        // Error silently
       }
     };
 

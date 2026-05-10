@@ -1,12 +1,47 @@
 import express from "express";
 const router = express.Router();
 import Freelancer from "../models/Freelancer.js";
-
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import mongoose from "mongoose";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 // ------------------ Freelancer Routes ------------------
 
+// 🌱 SEED ENDPOINT - Load 150 profiles from JSON
+router.post("/seed/load-from-json", async (req, res) => {
+  try {
+    const jsonPath = path.join(__dirname, "../../frontend/src/datas/freelancers.json");
+    
+    if (!fs.existsSync(jsonPath)) {
+      return res.status(404).json({ message: "freelancers.json not found" });
+    }
+
+    const freelancersData = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+
+    // Clear existing data (optional)
+    await Freelancer.deleteMany({});
+
+    // Insert all freelancers
+    const savedFreelancers = await Freelancer.insertMany(freelancersData);
+
+    res.status(201).json({
+      message: "✅ Database seeded successfully!",
+      count: savedFreelancers.length,
+      freelancers: savedFreelancers,
+    });
+  } catch (error) {
+    console.error("❌ Seed error:", error);
+    res.status(500).json({
+      message: "Error seeding database",
+      error: error.message,
+    });
+  }
+});
 
 // Create or update freelancer profile
 
@@ -53,8 +88,20 @@ router.get("/location", async (req, res) => {
     const { city, pincode } = req.query;
     if (!city) return res.status(400).json({ message: "City is required" });
 
-    let query = { city: { $regex: new RegExp(city, "i") } };
-    if (pincode) query.pincode = pincode;
+    // Support both nested location.city and flat city field
+    let query = {
+      $or: [
+        { city: { $regex: new RegExp(city, "i") } },
+        { "location.city": { $regex: new RegExp(city, "i") } }
+      ]
+    };
+    
+    if (pincode) {
+      query.$or.push(
+        { pincode: { $regex: new RegExp(pincode, "i") } },
+        { "location.pincode": { $regex: new RegExp(pincode, "i") } }
+      );
+    }
 
     const freelancers = await Freelancer.find(query);
     res.json(freelancers);
@@ -69,7 +116,10 @@ router.get("/category/:categoryName", async (req, res) => {
   try {
     const { categoryName } = req.params;
     const freelancers = await Freelancer.find({
-      category: { $regex: new RegExp("^" + categoryName + "$", "i") },
+      $or: [
+        { category: { $regex: new RegExp(categoryName, "i") } },
+        { subcategory: { $regex: new RegExp(categoryName, "i") } }
+      ]
     });
     res.json(freelancers);
   } catch (err) {

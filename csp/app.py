@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from rag_engine import ask_question
 import os
 
-API_KEY = "Vishnu@2004"
+API_KEY = "Unitoids@2026"
 
 app = FastAPI()
 

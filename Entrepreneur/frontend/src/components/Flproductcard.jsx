@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import freelancersData from "../datas/freelancers.json"; // ✅ ADD THIS
+import freelancersData from "../datas/freelancers.json";
 
 export default function Flproductcard() {
   const { categoryName } = useParams();
@@ -9,55 +9,50 @@ export default function Flproductcard() {
   const [loading, setLoading] = useState(true);
 
 useEffect(() => {
-  const fetchFreelancers = async () => {
-    try {
-      const decodedCategory = decodeURIComponent(categoryName).toLowerCase();
+  const decodedCategory = decodeURIComponent(categoryName).toLowerCase();
 
-      // ✅ 1. Existing backend (KEEP THIS)
+  const normalize = (value) => value.toLowerCase().replace(/\s+/g, "");
+
+  const filteredFreelancers = freelancersData.filter((freelancer) => {
+    const category = normalize(freelancer.subcategory || freelancer.category || "");
+    const clicked = normalize(decodedCategory);
+    const skills = (freelancer.skills || []).map(normalize);
+
+    return (
+      category.includes(clicked) ||
+      clicked.includes(category) ||
+      skills.some((skill) => skill.includes(clicked))
+    );
+  });
+
+  setFreelancers(filteredFreelancers);
+  setLoading(false);
+}, [categoryName]);
+
+// Fetch DB freelancers and merge with static data
+useEffect(() => {
+  const fetchDBFreelancers = async () => {
+    try {
       const res = await fetch(
         `http://localhost:5000/api/freelancers/category/${encodeURIComponent(categoryName)}`
       );
       const dbData = await res.json();
+      const dbFreelancers = Array.isArray(dbData) ? dbData : [];
 
-      // ✅ 2. Dummy JSON (ADD THIS ONLY)
-      const jsonData = freelancersData;
-
-      // ✅ 3. Filter JSON data
-const normalize = (str) =>
-  str.toLowerCase().replace(/\s+/g, "");
-
-const filteredJson = jsonData.filter((f) => {
-  const sub = normalize(f.subcategory || "");
-  const skills = (f.skills || []).map(normalize);
-  const cat = normalize(decodedCategory);
-
-  return (
-    sub.includes(cat) ||
-    cat.includes(sub) ||
-    skills.some((skill) => skill.includes(cat))
-  );
-});
-console.log("Clicked category:", decodedCategory);
-console.log("Sample JSON:", jsonData[0]);
-console.log("Filtered JSON:", filteredJson);
-
-      // ✅ 4. Merge both
-      const finalData = [
-        ...(Array.isArray(dbData) ? dbData : []),
-        ...filteredJson,
-      ];
-
-      setFreelancers(finalData);
-      setLoading(false);
-
+      if (dbFreelancers.length > 0) {
+        setFreelancers((prevFreelancers) => [
+          ...prevFreelancers,
+          ...dbFreelancers,
+        ]);
+      }
     } catch (error) {
-      console.error("Error:", error);
-      setFreelancers([]);
-      setLoading(false);
+      // Error silently
     }
   };
 
-  fetchFreelancers();
+  if (freelancers.length > 0) {
+    fetchDBFreelancers();
+  }
 }, [categoryName]);
 
   return (
@@ -106,7 +101,7 @@ console.log("Filtered JSON:", filteredJson);
                   </h2>
 
                   <p className="text-gray-400 text-sm">
-                    {freelancer.category}
+                    {freelancer.category || freelancer.subcategory}
                   </p>
 
                   <p className="text-gray-500 text-sm mt-1">

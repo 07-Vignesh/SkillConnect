@@ -9,7 +9,6 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 
 function Contact() {
-  const { toast } = useToast();
   const formRef = useRef();
 
 const sendEmail = (e) => {
@@ -157,7 +156,7 @@ const sendEmail = (e) => {
 
       {/* ================= FOOTER ================= */}
       <footer className="relative z-10 text-center py-6 text-gray-500">
-        © 2026 SkillConnect. All rights reserved.
+        © 2026 Unitoids. All rights reserved.
       </footer>
     </div>
   );

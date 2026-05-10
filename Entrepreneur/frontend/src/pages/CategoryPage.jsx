@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import freelancersData from "../datas/freelancers.json";
 
 // shadcn
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,10 +10,13 @@ export default function CategoryPage() {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/categories")
-      .then((res) => res.json())
-      .then((data) => setCategories(data))
-      .catch((err) => console.error("❌ Failed to fetch categories:", err));
+    const uniqueCategories = [
+      ...new Set(
+        freelancersData.map((freelancer) => freelancer.subcategory || freelancer.category)
+      ),
+    ].filter(Boolean);
+
+    setCategories(uniqueCategories.map((name) => ({ name })));
   }, []);
 
   return (

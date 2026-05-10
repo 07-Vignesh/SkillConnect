@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
         const decoded = jwt_decode(token); // works with * import
         setFreelancer({ _id: decoded.id, email: decoded.email });
       } catch (err) {
-        console.error("Invalid token", err);
+        // Invalid token
       }
     }
   }, []);

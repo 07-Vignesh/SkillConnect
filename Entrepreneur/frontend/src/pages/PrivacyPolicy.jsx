@@ -112,7 +112,7 @@ function PrivacyPolicy() {
 
       {/* ================= FOOTER ================= */}
       <footer className="text-center py-8 text-gray-500 text-sm relative z-10 border-t border-white/10">
-        © 2026 SkillConnect. All rights reserved.
+        © 2026 Unitoids. All rights reserved.
       </footer>
     </div>
   );

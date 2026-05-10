@@ -20,7 +20,6 @@ export default function FreelancerDetails() {
 useEffect(() => {
   const fetchFreelancer = async () => {
     try {
-      // ✅ Try MongoDB first
       const res = await fetch(
         `http://localhost:5000/api/freelancers/${id}`
       );
@@ -33,11 +32,13 @@ useEffect(() => {
       }
 
     } catch (err) {
-      // ✅ Fallback to JSON
-      const found = freelancersData.find((f) => f.id === id);
+      const found = freelancersData.find(
+        (freelancer) => freelancer.id === id || freelancer._id === id
+      );
 
       if (found) {
         setFreelancer(found);
+        setError("");
       } else {
         setError("Freelancer not found");
       }

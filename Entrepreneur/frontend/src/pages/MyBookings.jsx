@@ -16,7 +16,7 @@ export default function MyBookings({ userEmail }) {
         const data = await res.json();
         setBookings(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error(err);
+        // Error silently
       } finally {
         setLoading(false);
       }

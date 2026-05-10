@@ -22,7 +22,7 @@ function FreelancerDashboard() {
         const data = await res.json();
         setFreelancer(data);
       } catch (err) {
-        console.error("Error fetching freelancer:", err);
+        // Error silently
       } finally {
         setLoading(false);
       }
@@ -70,7 +70,7 @@ const handleBookingAction = async (bookingId, action) => {
       setFreelancer(freshData);
     }
   } catch (err) {
-    console.error("Error updating booking:", err);
+    // Error silently
   }
 };
 

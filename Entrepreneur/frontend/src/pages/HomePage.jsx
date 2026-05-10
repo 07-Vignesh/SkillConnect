@@ -11,15 +11,31 @@ function HomePage() {
   const { isSignedIn } = useUser();
   const [role, setRole] = useState("");
 
-  useEffect(() => {
-    if (!isSignedIn) {
-      setRole("");
-      localStorage.removeItem("role");
-    } else {
-      const userRole = localStorage.getItem("role");
-      setRole(userRole || "");
+useEffect(() => {
+  if (!isSignedIn) {
+    // 🔥 logout → reset role
+    setRole("");
+    localStorage.removeItem("role");
+  } else {
+    // 🔥 login → load role
+    const userRole = localStorage.getItem("role");
+    setRole(userRole || "");
+  }
+}, [isSignedIn]);
+  const sendMessage = async (message) => {
+    try {
+      const res = await fetch("http://localhost:5000/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+
+      return await res.json();
+    } catch (err) {
+      console.error("Chat API error:", err);
+      return { error: "Sorry, I could not process your message." };
     }
-  }, [isSignedIn]);
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -158,23 +174,23 @@ function HomePage() {
                 Get Started
               </Button>
             </Link>
-          ) : (
-            <div className="flex gap-4">
-              <Link to="/services">
-                <Button size="lg" className="bg-white text-black hover:bg-gray-200">
-                  Get Started
-                </Button>
-              </Link>
-              <Link to="/freelancer-signup">
-                <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/70">
-                  Become Freelancer
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
 
+            <Link to="/freelancer-signup">
+              <Button
+  variant="outline"
+  size="lg"
+  className="border-white text-white hover:bg-white/70"
+>
+  Become Freelancer
+</Button>
+            </Link>
+          </div>
+        )}
+
+      </div>
+
+      </section>
+      <ChatBot sendMessage={sendMessage} />
     </div>
   );
 }

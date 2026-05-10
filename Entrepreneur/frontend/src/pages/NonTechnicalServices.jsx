@@ -31,7 +31,6 @@ export default function NonTechnicalServices() {
       setLinkedin(data.suggestedFreelancers || []);
       setLoading(false);
     } catch (err) {
-      console.error("Error fetching freelancers:", err);
       setLoading(false);
     }
   };

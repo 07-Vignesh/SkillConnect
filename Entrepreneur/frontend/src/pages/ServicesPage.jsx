@@ -8,12 +8,52 @@ import { Button } from "@/components/ui/button";
 
 export default function NonTechnicalServices() {
   const [freelancers, setFreelancers] = useState([]);
+  const [allFreelancers, setAllFreelancers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [locationDenied, setLocationDenied] = useState(false);
   const [city, setCity] = useState("");
   const [pincode, setPincode] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [categories, setCategories] = useState([]);
 
-  const fetchFreelancers = async (userCity, userPincode) => {
+  const normalizeFreelancerList = (data) => {
+    const list = Array.isArray(data) ? data : data?.freelancers || [];
+    return list;
+  };
+
+  const applyCategoryFilter = (list, category) => {
+    if (!category) return list;
+    return list.filter(
+      (freelancer) => (freelancer.subcategory || freelancer.category) === category
+    );
+  };
+
+  const refreshCategories = (list) => {
+    if (list.length > 0) {
+      const uniqueCategories = [...new Set(list.map((freelancer) => freelancer.subcategory || freelancer.category).filter(Boolean))];
+      setCategories(uniqueCategories);
+    } else {
+      setCategories([]);
+    }
+  };
+
+  const fetchAllFreelancers = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("http://localhost:5000/api/freelancers");
+      const data = await res.json();
+      const freelancerList = normalizeFreelancerList(data);
+
+      setAllFreelancers(freelancerList);
+      setFreelancers(applyCategoryFilter(freelancerList, selectedCategory));
+      refreshCategories(freelancerList);
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+    }
+  };
+
+  const fetchFreelancersByLocation = async (userCity, userPincode) => {
     try {
       setLoading(true);
       let url = `http://localhost:5000/api/freelancers/location?city=${encodeURIComponent(userCity)}`;
@@ -21,10 +61,13 @@ export default function NonTechnicalServices() {
 
       const res = await fetch(url);
       const data = await res.json();
-      setFreelancers(data);
+      const freelancerList = normalizeFreelancerList(data);
+
+      setAllFreelancers(freelancerList);
+      setFreelancers(applyCategoryFilter(freelancerList, selectedCategory));
+      refreshCategories(freelancerList);
       setLoading(false);
     } catch (err) {
-      console.error(err);
       setLoading(false);
     }
   };
@@ -48,12 +91,14 @@ export default function NonTechnicalServices() {
         };
       }
     } catch (err) {
-      console.error(err);
+      // Error silently
     }
     return { city: "", pincode: "" };
   };
 
   useEffect(() => {
+    fetchAllFreelancers();
+
     const detectLocation = async () => {
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
@@ -66,20 +111,16 @@ export default function NonTechnicalServices() {
             if (loc.city) {
               setCity(loc.city);
               setPincode(loc.pincode);
-              fetchFreelancers(loc.city, loc.pincode);
             } else {
               setLocationDenied(true);
-              setLoading(false);
             }
           },
           () => {
             setLocationDenied(true);
-            setLoading(false);
           }
         );
       } else {
         setLocationDenied(true);
-        setLoading(false);
       }
     };
 
@@ -87,7 +128,12 @@ export default function NonTechnicalServices() {
   }, []);
 
   const handleSearch = () => {
-    if (city) fetchFreelancers(city, pincode);
+    if (city) fetchFreelancersByLocation(city, pincode);
+  };
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+    setFreelancers(applyCategoryFilter(allFreelancers, category));
   };
 
   return (
@@ -138,6 +184,41 @@ export default function NonTechnicalServices() {
         </div>
       )}
 
+      {/* ================= CATEGORY FILTER ================= */}
+      {freelancers.length > 0 && categories.length > 0 && (
+        <div className="relative z-10 max-w-2xl mx-auto px-6 mb-8">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => {
+                  handleCategoryChange("");
+              }}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                selectedCategory === ""
+                  ? "bg-blue-600 text-white"
+                  : "bg-white/5 text-gray-300 hover:bg-white/10"
+              }`}
+            >
+              All Services
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => {
+                  handleCategoryChange(cat);
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                  selectedCategory === cat
+                    ? "bg-blue-600 text-white"
+                    : "bg-white/5 text-gray-300 hover:bg-white/10"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ================= CARDS ================= */}
       <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6 pb-16">
 
@@ -147,29 +228,48 @@ export default function NonTechnicalServices() {
           </p>
         ) : freelancers.length > 0 ? (
           freelancers.map((f) => (
-            <Link key={f._id} to={`/freelancer/${f._id}`}>
-              <Card className="bg-white/5 border border-white/10 backdrop-blur hover:border-white/30 transition hover:-translate-y-1">
-                <CardContent className="p-6">
+            <Link key={f._id || f.id} to={`/freelancer/${f._id || f.id}`}>
+              <Card className="bg-white/5 border border-white/10 backdrop-blur hover:border-white/30 transition hover:-translate-y-1 h-full">
+                <CardContent className="p-6 flex flex-col justify-between h-full">
 
-                  <h2 className="text-xl font-semibold text-white">
-                    {f.name}
-                  </h2>
+                  <div>
+                    <h2 className="text-xl font-semibold text-white">
+                      {f.name}
+                    </h2>
 
-                  <p className="text-gray-400 text-sm mt-1">
-                    {f.category}
-                  </p>
-
-                  {/* ❌ LOCATION REMOVED */}
-
-                  {f.rating && (
-                    <p className="text-yellow-400 text-sm mt-2">
-                      ⭐ {f.rating}
+                    <p className="text-blue-300 text-sm mt-1 font-medium">
+                      {f.subcategory || f.category}
                     </p>
-                  )}
 
-                  <p className="text-lg font-bold mt-3 text-white">
-                    ₹{f.price}
-                  </p>
+                    {f.skills && f.skills.length > 0 && (
+                      <p className="text-gray-400 text-xs mt-2">
+                        {f.skills.slice(0, 2).join(", ")}
+                      </p>
+                    )}
+
+                    {f.experience && (
+                      <p className="text-gray-400 text-xs mt-1">
+                        📊 {f.experience}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-white/10">
+                    {f.rating && (
+                      <p className="text-yellow-400 text-sm mb-2">
+                        ⭐ {f.rating} ({f.completedJobs || 0} jobs)
+                      </p>
+                    )}
+
+                    <p className="text-lg font-bold text-white">
+                      ₹{f.pricing?.amount || f.price || "TBD"}
+                    </p>
+                    {f.pricing?.description && (
+                      <p className="text-gray-400 text-xs mt-1">
+                        {f.pricing.description}
+                      </p>
+                    )}
+                  </div>
 
                 </CardContent>
               </Card>
@@ -177,7 +277,7 @@ export default function NonTechnicalServices() {
           ))
         ) : (
           <p className="text-center text-gray-400 col-span-3">
-            No freelancers found nearby.
+            No freelancers found.
           </p>
         )}
       </div>

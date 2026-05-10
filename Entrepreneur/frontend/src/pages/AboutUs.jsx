@@ -60,16 +60,20 @@ function AboutUs() {
 
           <div className="grid gap-6 md:grid-cols-3">
             {[
-              { name: "Brian Jones", role: "Founder & CEO" },
-              { name: "Ananya Sharma", role: "Head of Operations" },
-              { name: "Rohit Patel", role: "Tech Lead" },
+              { name: "Iklash Ahamed", role: "Founder & CEO", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Brian" },
+              { name: "Vignesh", role: "Head of Operations", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ananya" },
+              { name: "Pranav", role: "Tech Lead", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rohit" },
             ].map((member, i) => (
               <Card
                 key={i}
                 className="bg-white/5 border-white/10 hover:border-white/30 transition backdrop-blur"
               >
                 <CardContent className="pt-6 text-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-gray-600 to-gray-800 mx-auto mb-4" />
+                  <img 
+                    src={member.image} 
+                    alt={member.name}
+                    className="w-16 h-16 rounded-full mx-auto mb-4 border-2 border-white/20"
+                  />
 
                   <h3 className="font-semibold text-lg text-white">
                     {member.name}
@@ -129,12 +133,21 @@ function AboutUs() {
         <h2 className="text-3xl font-bold text-white">Trusted By</h2>
 
         <div className="mt-8 flex justify-center gap-6 flex-wrap">
-          {[1, 2, 3].map((i) => (
+          {[
+            { name: "Hareesh", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" },
+            { name: "Karthick", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" },
+            { name: "Arun", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma" },
+          ].map((client) => (
             <div
-              key={i}
-              className="w-32 h-12 bg-white/5 border border-white/10 rounded-md flex items-center justify-center text-sm text-gray-400 hover:border-white/30 transition"
+              key={client.name}
+              className="w-32 h-32 bg-white/5 border border-white/10 rounded-md flex flex-col items-center justify-center hover:border-white/30 transition"
             >
-              Client {i}
+              <img 
+                src={client.image} 
+                alt={client.name}
+                className="w-16 h-16 rounded-full mb-2 border-2 border-white/20"
+              />
+              <span className="text-sm text-gray-400">{client.name}</span>
             </div>
           ))}
         </div>
@@ -142,7 +155,7 @@ function AboutUs() {
 
       {/* ================= FOOTER ================= */}
       <footer className="relative z-10 text-center py-6 text-gray-500">
-        © 2026 SkillConnect. All rights reserved.
+        © 2026 Unitoids. All rights reserved.
       </footer>
     </div>
   );
