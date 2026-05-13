@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 
 function Contact() {
   const formRef = useRef();
@@ -16,7 +16,7 @@ const sendEmail = (e) => {
 
   emailjs.sendForm(
   "service_25fd36p",
-  "template_9xowq6g",
+  "2006vigneshvicky@gmail.com",
   formRef.current,
   "DAKh3X85S7WRVC8BE"
 )
@@ -119,7 +119,7 @@ const sendEmail = (e) => {
             <div className="space-y-3 text-sm text-gray-300">
               <p>Location: Karaikudi, Tamil Nadu</p>
               <p>GMail: 2006vigneshvicky@gmail.com</p>
-              <p>Mobile: +91 8925615178</p>
+              <p>Mobile: +91 89256 15178</p>
             </div>
 
             {/* 🔥 SOCIAL */}
@@ -156,7 +156,8 @@ const sendEmail = (e) => {
 
       {/* ================= FOOTER ================= */}
       <footer className="relative z-10 text-center py-6 text-gray-500">
-        © 2026 Unitoids. All rights reserved.
+        <p>© 2026 SkillConnect. All rights reserved.</p>
+        <p className="mt-2 text-sm text-white">Made by Vikneshwaran ❤️</p>
       </footer>
     </div>
   );

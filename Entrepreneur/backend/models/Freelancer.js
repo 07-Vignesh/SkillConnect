@@ -9,10 +9,12 @@ const pricingSchema = new mongoose.Schema(
   { _id: false }
 );
 
+
 const freelancerSchema = new mongoose.Schema({
   id: String,
   name: String,
   email: String,
+
   category: String,
   subcategory: String,
   skills: [String],
@@ -46,5 +48,7 @@ const freelancerSchema = new mongoose.Schema({
 
   createdAt: { type: Date, default: Date.now },
 });
+
+
 
 export default mongoose.model("freelancer", freelancerSchema);

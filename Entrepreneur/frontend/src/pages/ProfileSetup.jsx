@@ -15,6 +15,8 @@ export default function ProfileSetup() {
   const [pincode, setPincode] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
+  const [skills, setSkills] = useState([]);
+  const [skillInput, setSkillInput] = useState("");
   const [services, setServices] = useState([{ title: "", description: "" }]);
   const [loading, setLoading] = useState(false);
 
@@ -22,6 +24,17 @@ export default function ProfileSetup() {
     const newServices = [...services];
     newServices[index][e.target.name] = e.target.value;
     setServices(newServices);
+  };
+
+  const addSkill = () => {
+    if (skillInput.trim() !== "") {
+      setSkills([...skills, skillInput.trim()]);
+      setSkillInput("");
+    }
+  };
+
+  const removeSkill = (index) => {
+    setSkills(skills.filter((_, i) => i !== index));
   };
 
   const addService = () => {
@@ -54,6 +67,7 @@ export default function ProfileSetup() {
           pincode,
           category: normalizedCategory,
           price,
+          skills,
           services,
         }),
       });
@@ -130,6 +144,46 @@ export default function ProfileSetup() {
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             />
+
+            {/* SKILLS */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-white">Your Skills</h3>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Add a skill (e.g., React, Python)"
+                  value={skillInput}
+                  onChange={(e) => setSkillInput(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())}
+                />
+                <Button
+                  type="button"
+                  onClick={addSkill}
+                  className="px-4"
+                >
+                  Add
+                </Button>
+              </div>
+              
+              {skills.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {skills.map((skill, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 rounded-full bg-primary text-white text-sm flex items-center gap-2"
+                    >
+                      {skill}
+                      <button
+                        type="button"
+                        onClick={() => removeSkill(index)}
+                        className="hover:text-gray-200"
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* SERVICES */}
             <div className="space-y-4">

@@ -1,8 +1,8 @@
-const express = require("express");
+import express from "express";
+import Freelancer from "../models/Freelancer.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 const router = express.Router();
-const Freelancer = require("../models/Freelancer");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 
 // Generate JWT
 const generateToken = (id) => {
@@ -10,13 +10,21 @@ const generateToken = (id) => {
 };
 
 // Register freelancer (optional)
+// Clerk-only: Register/Upsert freelancer profile (no password)
 router.post("/register", async (req, res) => {
-  const { name, email, password, category, city, pincode } = req.body;
+  const { name, email, category, city, pincode } = req.body;
   try {
-    const existing = await Freelancer.findOne({ email });
-    if (existing) return res.status(400).json({ message: "Email already exists" });
-
-    const freelancer = await Freelancer.create({ name, email, password, category, city, pincode });
+    let freelancer = await Freelancer.findOne({ email });
+    if (freelancer) {
+      // Update profile if exists
+      freelancer.name = name;
+      freelancer.category = category;
+      freelancer.city = city;
+      freelancer.pincode = pincode;
+      await freelancer.save();
+    } else {
+      freelancer = await Freelancer.create({ name, email, category, city, pincode });
+    }
     res.status(201).json({
       freelancer,
       token: generateToken(freelancer._id)
@@ -28,15 +36,12 @@ router.post("/register", async (req, res) => {
 });
 
 // Login freelancer
+// Clerk-only: Login is handled by Clerk, this endpoint can be used to fetch freelancer profile by email
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { email } = req.body;
   try {
     const freelancer = await Freelancer.findOne({ email });
-    if (!freelancer) return res.status(401).json({ message: "Invalid email or password" });
-
-    const isMatch = await freelancer.matchPassword(password);
-    if (!isMatch) return res.status(401).json({ message: "Invalid email or password" });
-
+    if (!freelancer) return res.status(404).json({ message: "Freelancer profile not found" });
     res.json({
       freelancer,
       token: generateToken(freelancer._id)
@@ -47,4 +52,4 @@ router.post("/login", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

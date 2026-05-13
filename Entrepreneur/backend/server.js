@@ -8,6 +8,7 @@ import connectDB from "./config/db.js";
 import freelancerRoutes from "./routes/freelancerRoutes.js";
 import bookingRoutes from "./routes/bookingroutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import Freelancer from "./models/Freelancer.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -30,7 +31,12 @@ const seedDatabase = async () => {
       return;
     }
 
-    const freelancersData = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+    let freelancersData = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+    // Add default password if missing
+    freelancersData = freelancersData.map(f => ({
+      ...f,
+      password: f.password && f.password.length >= 6 ? f.password : "changeme123"
+    }));
     const count = await Freelancer.countDocuments();
 
     if (count !== freelancersData.length) {
@@ -64,6 +70,7 @@ app.get("/", (req, res) => res.send("Freelancer API is running ✅"));
 app.use("/api/freelancers", freelancerRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/auth", authRoutes);
 app.post("/api/chat", async (req, res) => {
   try {
     const { message } = req.body;

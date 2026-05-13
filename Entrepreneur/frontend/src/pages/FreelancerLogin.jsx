@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // shadcn
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export default function FreelancerLogin() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -26,7 +28,9 @@ export default function FreelancerLogin() {
       if (res.ok) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("freelancerId", data.freelancer._id);
-        window.location.href = "/dashboard";
+        localStorage.setItem("role", "freelancer");
+        window.dispatchEvent(new Event("roleChanged"));
+        setTimeout(() => navigate("/freelancer-dashboard"), 100);
       } else {
         setError(data.message || "Login failed");
       }

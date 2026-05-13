@@ -60,8 +60,8 @@ function AboutUs() {
 
           <div className="grid gap-6 md:grid-cols-3">
             {[
-              { name: "Iklash Ahamed", role: "Founder & CEO", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Brian" },
-              { name: "Vignesh", role: "Head of Operations", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ananya" },
+              { name: "Iklash", role: "Head of Operations", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Brian" },
+              { name: "Vignesh", role: "Founder & CEO", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ananya" },
               { name: "Pranav", role: "Tech Lead", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rohit" },
             ].map((member, i) => (
               <Card
@@ -155,7 +155,8 @@ function AboutUs() {
 
       {/* ================= FOOTER ================= */}
       <footer className="relative z-10 text-center py-6 text-gray-500">
-        © 2026 Unitoids. All rights reserved.
+        <p>© 2026 SkillConnect. All rights reserved.</p>
+        <p className="mt-2 text-sm text-white">Made by Vikneshwaran ❤️</p>
       </footer>
     </div>
   );

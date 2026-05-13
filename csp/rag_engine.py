@@ -1,38 +1,21 @@
 import os
 from dotenv import load_dotenv
-
-from langchain_google_genai import ChatGoogleGenerativeAI
+import google.generativeai as genai
 from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_core.prompts import PromptTemplate  # ✅ fixed import
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain.prompts import PromptTemplate
 
-# Load environment variables
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+genai.configure(api_key=GOOGLE_API_KEY)
 
-# LLM
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    temperature=0.3,
-    google_api_key=GOOGLE_API_KEY
-)
+llm = None
+embeddings = None
+db = None
+retriever = None
 
-# Embeddings
-embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-)
-
-# Load FAISS vector store
-db = FAISS.load_local(
-    "vectorstore",
-    embeddings,
-    allow_dangerous_deserialization=True
-)
-
-retriever = db.as_retriever(search_kwargs={"k": 4})
-
-# Prompt template
 prompt = PromptTemplate(
     input_variables=["context", "question"],
     template="""
@@ -50,8 +33,35 @@ Answer clearly:
 """
 )
 
+def initialize():
+
+    global llm, embeddings, db, retriever
+
+    if llm is None:
+        llm = genai.GenerativeModel("gemini-3-flash-preview")
+    if embeddings is None:
+        # embeddings = HuggingFaceEmbeddings(
+        #     model_name="sentence-transformers/all-MiniLM-L6-v2"
+        # )
+       embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
+
+
+    if db is None:
+        db = FAISS.load_local(
+            "vectorstore",
+            embeddings,
+            allow_dangerous_deserialization=True
+        )
+
+        retriever = db.as_retriever(search_kwargs={"k": 4})
+
 def ask_question(query):
-    docs = retriever.invoke(query)  # ✅ get_relevant_documents is deprecated
+
+    initialize()
+
+    docs = retriever.get_relevant_documents(query)
 
     context = "\n".join([doc.page_content for doc in docs])
 
@@ -60,6 +70,6 @@ def ask_question(query):
         question=query
     )
 
-    result = llm.invoke(final_prompt)
+    response = llm.generate_content(final_prompt)
 
-    return result.content
+    return response.text
