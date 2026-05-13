@@ -1,0 +1,52 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="purpleGradient" x1="120" y1="80" x2="380" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D946EF"/>
+      <stop offset="50%" stop-color="#9333EA"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Transparent Background -->
+
+  <!-- S Shape -->
+  <path d="M340 90H210C180 90 155 115 155 145C155 175 180 200 210 200H290C320 200 345 225 345 255C345 285 320 310 290 310H160"
+        stroke="url(#purpleGradient)"
+        stroke-width="42"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <path d="M172 122L120 170L170 220"
+        stroke="url(#purpleGradient)"
+        stroke-width="42"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <path d="M328 292L380 340L330 390"
+        stroke="url(#purpleGradient)"
+        stroke-width="42"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- Handshake -->
+  <path d="M215 240L245 265C252 272 262 272 269 265L295 240"
+        stroke="#A855F7"
+        stroke-width="14"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <path d="M205 252L225 272"
+        stroke="#A855F7"
+        stroke-width="10"
+        stroke-linecap="round"/>
+
+  <path d="M287 252L267 272"
+        stroke="#A855F7"
+        stroke-width="10"
+        stroke-linecap="round"/>
+
+  <!-- Text -->
+  <text x="80" y="470" font-size="72" font-family="Poppins, Arial, sans-serif" font-weight="700" fill="url(#purpleGradient)">
+    SkillConnect
+  </text>
+</svg>

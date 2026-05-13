@@ -50,7 +50,7 @@ def initialize():
 
     if db is None:
         db = FAISS.load_local(
-            "vectorstore",
+            "data/faiss_freelancers_index",
             embeddings,
             allow_dangerous_deserialization=True
         )
