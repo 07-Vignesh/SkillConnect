@@ -33,7 +33,7 @@ function App() {
   const sessionId = useState(() => `session-${Date.now()}`)[0];
 
   const sendMessage = async (message) => {
-    const response = await fetch("http://localhost:8000/chat", {
+    const response = await fetch("https://skillconnect-ai.onrender.com/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
