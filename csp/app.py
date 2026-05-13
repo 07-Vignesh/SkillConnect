@@ -21,14 +21,7 @@ class Query(BaseModel):
 
 
 @app.post("/chat")
-
-def chat(
-    query: Query,
-    x_api_key: str = Header(None)
-):
-
-    if x_api_key != API_KEY:
-        raise HTTPException(status_code=401)
+def chat(query: Query):
 
     answer = ask_question(query.message)
 
