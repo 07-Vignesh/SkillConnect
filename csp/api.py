@@ -356,11 +356,7 @@ async def chat_endpoint(
         # AUTH
         # ===============================
 
-        if x_api_key != API_KEY:
-            raise HTTPException(
-                status_code=401,
-                detail="Unauthorized"
-            )
+       
 
         query = req.message.strip()
 
