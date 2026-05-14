@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { BACKEND_URL } from "../config";
 
 // shadcn
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,7 +12,7 @@ export default function MyBookings({ userEmail }) {
     const fetchBookings = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/freelancers/user-bookings/${userEmail}`
+          `${BACKEND_URL}/api/freelancers/user-bookings/${userEmail}`
         );
         const data = await res.json();
         setBookings(Array.isArray(data) ? data : []);

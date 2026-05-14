@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BACKEND_URL } from "../config";
 import { useUser } from "@clerk/clerk-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,13 +12,10 @@ export default function ProfileSetup() {
   const { user } = useUser();
 
   const [name, setName] = useState(user?.firstName || "");
-  const [email, setEmail] = useState(user?.emailAddresses?.[0]?.emailAddress || "");
   const [city, setCity] = useState("");
   const [pincode, setPincode] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
-  const [skills, setSkills] = useState([]);
-  const [skillInput, setSkillInput] = useState("");
   const [services, setServices] = useState([{ title: "", description: "" }]);
   const [loading, setLoading] = useState(false);
 
@@ -25,17 +23,6 @@ export default function ProfileSetup() {
     const newServices = [...services];
     newServices[index][e.target.name] = e.target.value;
     setServices(newServices);
-  };
-
-  const addSkill = () => {
-    if (skillInput.trim() !== "") {
-      setSkills([...skills, skillInput.trim()]);
-      setSkillInput("");
-    }
-  };
-
-  const removeSkill = (index) => {
-    setSkills(skills.filter((_, i) => i !== index));
   };
 
   const addService = () => {
@@ -58,18 +45,16 @@ export default function ProfileSetup() {
     try {
       const normalizedCategory = normalizeCategory(category);
 
-
-      const res = await fetch("http://localhost:5000/api/freelancers", {
+      const res = await fetch(`${BACKEND_URL}/api/freelancers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
-          email,
+          email: user?.emailAddresses[0]?.emailAddress,
           city,
           pincode,
           category: normalizedCategory,
           price,
-          skills,
           services,
         }),
       });
@@ -77,21 +62,21 @@ export default function ProfileSetup() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      // Try to add category but don't fail if it errors
-      try {
-        await fetch("http://localhost:5000/api/categories", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: normalizedCategory }),
-        });
-      } catch (categoryErr) {
-        console.warn("Category creation failed, but profile was saved:", categoryErr);
+      // Save freelancer id so dashboard can fetch it without re-login
+      if (data._id) {
+        localStorage.setItem("freelancerId", data._id);
       }
+
+      await fetch(`${BACKEND_URL}/api/categories`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: normalizedCategory }),
+      });
 
       navigate("/freelancer-dashboard");
 
     } catch (err) {
-      alert("Error saving profile: " + err.message);
+      alert("Error saving profile");
     } finally {
       setLoading(false);
     }
@@ -120,15 +105,6 @@ export default function ProfileSetup() {
           {/* FORM */}
           <form onSubmit={handleSubmit} className="space-y-4 text-white">
 
-
-            <Input
-              placeholder="Email Address"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-            />
-
             <Input
               placeholder="Full Name"
               value={name}
@@ -156,52 +132,10 @@ export default function ProfileSetup() {
 
             <Input
               type="number"
-              placeholder="Base Price"
+              placeholder="Base Price ₹"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             />
-
-
-
-            {/* SKILLS */}
-            <div className="space-y-3">
-              <h3 className="font-semibold text-white">Your Skills</h3>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Add a skill (e.g., React, Python)"
-                  value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())}
-                />
-                <Button
-                  type="button"
-                  onClick={addSkill}
-                  className="px-4"
-                >
-                  Add
-                </Button>
-              </div>
-              
-              {skills.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {skills.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 rounded-full bg-primary text-white text-sm flex items-center gap-2"
-                    >
-                      {skill}
-                      <button
-                        type="button"
-                        onClick={() => removeSkill(index)}
-                        className="hover:text-gray-200"
-                      >
-                        ✕
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
 
             {/* SERVICES */}
             <div className="space-y-4">

@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 import { CheckCircle, XCircle, TrendingUp, Star, Briefcase, User, Mail, MapPin, Tag } from "lucide-react";
-
+import { BACKEND_URL } from "../config.js";
 function FreelancerDashboard() {
+  const { user } = useUser();
   const [freelancer, setFreelancer] = useState(null);
   const [bookings, setBookings]     = useState([]);
   const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState("");
 
-  /* ── fetch freelancer from localStorage token/id ── */
+  /* ── fetch freelancer: try localStorage id first, fall back to Clerk email ── */
   useEffect(() => {
     const fetchFreelancer = async () => {
       setLoading(true);
@@ -16,35 +17,61 @@ function FreelancerDashboard() {
         const id    = localStorage.getItem("freelancerId");
         const token = localStorage.getItem("token");
 
-        if (!id || !token) {
-          // No session — show empty dashboard, not an error
-          setLoading(false);
-          return;
+        // Strategy 1: custom JWT login (FreelancerLogin flow)
+        if (id && token) {
+          const res = await fetch(`${BACKEND_URL}/api/freelancers/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setFreelancer(data);
+            setLoading(false);
+            return;
+          }
         }
 
-        const res = await fetch(`http://localhost:5000/api/freelancers/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // Strategy 2: id in localStorage but no token (ProfileSetup signup flow)
+        if (id) {
+          const res = await fetch(`${BACKEND_URL}/api/freelancers/${id}`);
+          if (res.ok) {
+            const data = await res.json();
+            setFreelancer(data);
+            setLoading(false);
+            return;
+          }
+        }
 
-        if (!res.ok) throw new Error("fetch_failed");
-        const data = await res.json();
-        setFreelancer(data);
-      } catch (e) {
-        // Don't show hard error — fall through to empty state
+        // Strategy 3: fall back to Clerk email (ProfileSetup uses Clerk user)
+        const email = user?.emailAddresses?.[0]?.emailAddress;
+        if (email) {
+          const res = await fetch(`${BACKEND_URL}/api/freelancers/by-email/${email}`);
+          if (res.ok) {
+            const data = await res.json();
+            // Cache the id so next load is faster
+            if (data._id) localStorage.setItem("freelancerId", data._id);
+            setFreelancer(data);
+            setLoading(false);
+            return;
+          }
+        }
+
+        // No session found — show empty state
+        setFreelancer(null);
+      } catch {
         setFreelancer(null);
       } finally {
         setLoading(false);
       }
     };
     fetchFreelancer();
-  }, []);
+  }, [user]);
 
   /* ── fetch bookings once freelancer is loaded ── */
   useEffect(() => {
     if (!freelancer?._id) return;
     const fetchBookings = async () => {
       try {
-        const res  = await fetch(`http://localhost:5000/api/bookings/freelancer/${freelancer._id}`);
+        const res  = await fetch(`${BACKEND_URL}/api/bookings/freelancer/${freelancer._id}`);
         const data = await res.json();
         setBookings(Array.isArray(data) ? data : []);
       } catch {
@@ -57,12 +84,12 @@ function FreelancerDashboard() {
   /* ── accept / ignore booking ── */
   const handleBookingAction = async (bookingId, action) => {
     try {
-      const res     = await fetch(`http://localhost:5000/api/bookings/${bookingId}/${action}`, { method: "PUT" });
+      const res     = await fetch(`${BACKEND_URL}/api/bookings/${bookingId}/${action}`, { method: "PUT" });
       const updated = await res.json();
       if (!res.ok) throw new Error();
       setBookings(prev => prev.map(b => b._id === bookingId ? updated : b));
       if (freelancer?._id) {
-        const r = await fetch(`http://localhost:5000/api/freelancers/${freelancer._id}`);
+        const r = await fetch(`${BACKEND_URL}/api/freelancers/${freelancer._id}`);
         setFreelancer(await r.json());
       }
     } catch {}
@@ -136,7 +163,9 @@ function FreelancerDashboard() {
 
         {/* CTAs */}
         <div className="flex flex-wrap justify-center gap-3">
-          
+          <Link to="/freelancer-login">
+            <button className="btn-primary px-7 py-3">Log In as Freelancer</button>
+          </Link>
           <Link to="/freelancer-signup">
             <button className="btn-ghost px-7 py-3">Create Account</button>
           </Link>

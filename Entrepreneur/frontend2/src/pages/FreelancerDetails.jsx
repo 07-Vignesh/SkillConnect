@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { BACKEND_URL } from "../config";
 import { useUser } from "@clerk/clerk-react";
 import freelancersData from "../datas/freelancers.json";
 import { CheckCircle, MapPin, Star, Zap, Shield } from "lucide-react";
@@ -15,7 +16,7 @@ export default function FreelancerDetails() {
   useEffect(() => {
     const fetchFreelancer = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/freelancers/${id}`);
+        const res = await fetch(`${BACKEND_URL}/api/freelancers/${id}`);
         const data = await res.json();
         if (data && data._id) { setFreelancer(data); }
         else throw new Error("Not in DB");
@@ -34,7 +35,7 @@ export default function FreelancerDetails() {
     if (!user) { setError("Please login first"); return; }
     const projectDetails = e.target.details.value;
     if (!projectDetails) { setError("Project details required"); return; }
-    const res = await fetch("http://localhost:5000/api/bookings", {
+    const res = await fetch(`${BACKEND_URL}/api/bookings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ freelancerId: id, clientId: user.id, clientName: user.fullName, clientEmail: user.emailAddresses[0].emailAddress, projectDetails, advanceFee: 49, status: "pending" }),
@@ -44,7 +45,7 @@ export default function FreelancerDetails() {
   };
 
   const cancelBooking = async () => {
-    await fetch(`http://localhost:5000/api/bookings/${booking._id}/cancel`, { method: "PUT" });
+    await fetch(`${BACKEND_URL}/api/bookings/${booking._id}/cancel`, { method: "PUT" });
     setBooking(null);
   };
 

@@ -83,7 +83,7 @@ export default function HomePage() {
 
   const sendMessage = async (message) => {
     try {
-      const res = await fetch("https://skillconnect-ai.onrender.com/chat", {
+      const res = await fetch("https://unitoids.onrender.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-api-key": "Unitoids@2026", "x-session-id": "default" },
         body: JSON.stringify({ message }),

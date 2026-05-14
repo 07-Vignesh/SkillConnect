@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { BACKEND_URL } from "../config";
 import { Link } from "react-router-dom";
 import { MapPin, Search, SlidersHorizontal } from "lucide-react";
+
 
 export default function ServicesPage() {
   const [freelancers, setFreelancers]         = useState([]);
@@ -23,7 +25,7 @@ export default function ServicesPage() {
   const fetchAll = async () => {
     try {
       setLoading(true);
-      const res  = await fetch("http://localhost:5000/api/freelancers");
+      const res  = await fetch(`${BACKEND_URL}/api/freelancers`);
       const data = await res.json();
       const list = normalizeList(data);
       setAllFreelancers(list);
@@ -35,7 +37,7 @@ export default function ServicesPage() {
   const fetchByLocation = async (userCity, userPincode) => {
     try {
       setLoading(true);
-      let url = `http://localhost:5000/api/freelancers/location?city=${encodeURIComponent(userCity)}`;
+      let url = `${BACKEND_URL}/api/freelancers/location?city=${encodeURIComponent(userCity)}`;
       if (userPincode) url += `&pincode=${encodeURIComponent(userPincode)}`;
       const res  = await fetch(url);
       const data = await res.json();

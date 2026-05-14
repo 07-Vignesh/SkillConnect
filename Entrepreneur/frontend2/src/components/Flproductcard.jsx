@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import freelancersData from "../datas/freelancers.json";
+import { BACKEND_URL } from "../config.js";
+
 
 export default function Flproductcard() {
   const { categoryName } = useParams();
@@ -23,7 +25,7 @@ export default function Flproductcard() {
   useEffect(() => {
     const fetchDB = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/freelancers/category/${encodeURIComponent(categoryName)}`);
+        const res = await fetch(`${BACKEND_URL}/api/freelancers/category/${encodeURIComponent(categoryName)}`);
         const dbData = await res.json();
         const db = Array.isArray(dbData) ? dbData : [];
         if (db.length > 0) setFreelancers(prev => [...prev, ...db]);
