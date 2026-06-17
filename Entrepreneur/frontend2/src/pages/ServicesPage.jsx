@@ -12,15 +12,22 @@ export default function ServicesPage() {
   const [city, setCity]                       = useState("");
   const [pincode, setPincode]                 = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [categories, setCategories]           = useState([]);
-  const [showFilters, setShowFilters]         = useState(false);
+
+  // 🔧 FIX: categories are now split into two pieces of state:
+  //   - masterCategories → built ONCE from the full /api/freelancers list.
+  //   - categories        → what's actually rendered as filter pills.
+  // Previously `categories` was rebuilt from whatever list came back from
+  // the location search, so a city with 0 matches reset it to [] and the
+  // filter pills disappeared entirely (Filters button looked "broken").
+  const [masterCategories, setMasterCategories] = useState([]);
+  const [categories, setCategories]             = useState([]);
+  const [showFilters, setShowFilters]           = useState(false);
 
   const normalizeList = (data) => Array.isArray(data) ? data : data?.freelancers || [];
   const applyFilter   = (list, cat) => cat ? list.filter(f => (f.subcategory || f.category) === cat) : list;
-  const refreshCats   = (list) => {
-    const unique = [...new Set(list.map(f => f.subcategory || f.category).filter(Boolean))];
-    setCategories(list.length > 0 ? unique : []);
-  };
+
+  const extractCategories = (list) =>
+    [...new Set(list.map(f => f.subcategory || f.category).filter(Boolean))];
 
   const fetchAll = async () => {
     try {
@@ -28,13 +35,18 @@ export default function ServicesPage() {
       const res  = await fetch(`${BACKEND_URL}/api/freelancers`);
       const data = await res.json();
       const list = normalizeList(data);
+      const cats = extractCategories(list);
+
       setAllFreelancers(list);
       setFreelancers(applyFilter(list, selectedCategory));
-      refreshCats(list);
+
+      // This is the master list — always populate both from it on initial load.
+      setMasterCategories(cats);
+      setCategories(cats);
     } finally { setLoading(false); }
   };
 
-  const fetchByLocation = async (userCity, userPincode) => {
+  const fetchByLocation = async (userCity, userPincode, category = "") => {
     try {
       setLoading(true);
       let url = `${BACKEND_URL}/api/freelancers/location?city=${encodeURIComponent(userCity)}`;
@@ -42,9 +54,20 @@ export default function ServicesPage() {
       const res  = await fetch(url);
       const data = await res.json();
       const list = normalizeList(data);
+
       setAllFreelancers(list);
-      setFreelancers(applyFilter(list, selectedCategory));
-      refreshCats(list);
+      setFreelancers(applyFilter(list, category));
+
+      // 🔧 FIX: only swap in this city's categories if it actually HAS any.
+      // If the city has 0 freelancers, fall back to masterCategories instead
+      // of clearing the list — keeps the filter pills usable.
+      const cats = extractCategories(list);
+      setCategories(cats.length > 0 ? cats : masterCategories);
+    } catch (error) {
+      console.error("Error fetching by location:", error);
+      setFreelancers([]);
+      // 🔧 Even on a hard error, don't nuke the filter pills.
+      setCategories(masterCategories);
     } finally { setLoading(false); }
   };
 
@@ -79,7 +102,12 @@ export default function ServicesPage() {
     detect();
   }, []);
 
-  const handleSearch         = () => { if (city) fetchByLocation(city, pincode); };
+  const handleSearch         = () => {
+    if (city) {
+      setSelectedCategory(""); // Reset category filter
+      fetchByLocation(city, pincode, ""); // Pass empty string to show all results
+    }
+  };
   const handleCategoryChange = (cat) => {
     setSelectedCategory(cat);
     setFreelancers(applyFilter(allFreelancers, cat));
@@ -115,11 +143,11 @@ export default function ServicesPage() {
                 className="bg-transparent outline-none text-sm text-white placeholder:text-gray-500 flex-1"
               />
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => setShowFilters(!showFilters)} className="btn-ghost text-xs px-3 py-2 gap-1.5">
+            <div className="flex gap-2 w-full sm:w-auto">
+              <button type="button" onClick={() => setShowFilters(!showFilters)} className="btn-ghost text-xs px-3 py-2 gap-1.5 flex-none">
                 <SlidersHorizontal size={14} /> Filters
               </button>
-              <button onClick={handleSearch} className="btn-primary text-xs sm:text-sm px-4 sm:px-6 py-2 gap-1.5 flex-1 sm:flex-none justify-center">
+              <button type="button" onClick={handleSearch} disabled={!city} className="btn-primary text-xs sm:text-sm px-4 sm:px-6 py-2 gap-1.5 flex-1 sm:flex-none justify-center disabled:opacity-50 disabled:cursor-not-allowed">
                 <Search size={14} /> Search
               </button>
             </div>
@@ -133,6 +161,7 @@ export default function ServicesPage() {
           {showFilters && categories.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2 justify-center">
               <button
+                type="button"
                 onClick={() => handleCategoryChange("")}
                 className={`text-xs px-3 py-1.5 rounded-full border transition-all ${selectedCategory === "" ? "bg-violet-600 border-violet-500 text-white" : "border-white/10 text-gray-400 hover:border-violet-500/50 hover:text-white"}`}
               >
@@ -140,6 +169,7 @@ export default function ServicesPage() {
               </button>
               {categories.map((cat, i) => (
                 <button
+                  type="button"
                   key={i}
                   onClick={() => handleCategoryChange(cat)}
                   className={`text-xs px-3 py-1.5 rounded-full border transition-all ${selectedCategory === cat ? "bg-violet-600 border-violet-500 text-white" : "border-white/10 text-gray-400 hover:border-violet-500/50 hover:text-white"}`}
