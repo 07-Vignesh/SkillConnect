@@ -138,17 +138,6 @@ python create_vectorstore.py
 
 ---
 
-##  Screenshots
-
-<img width="1920" height="1080" alt="SkillConnect" src="https://github.com/user-attachments/assets/f97991cc-2580-43d7-9226-2e8dfdc0adb6" />
-<img width="1920" height="1080" alt="SkillConnect" src="https://github.com/user-attachments/assets/72e1d0e8-2f02-42a6-afc1-47763c78d76d" />
-<img width="1920" height="1080" alt="SkillConnect" src="https://github.com/user-attachments/assets/6165d925-b0e4-42c6-a819-76a815388139" />
-<img width="1920" height="1080" alt="SkillConnect" src="https://github.com/user-attachments/assets/4ef2a2f5-0e98-4c32-ac84-8bd737167834" />
-<img width="1920" height="1080" alt="SkillConnect" src="https://github.com/user-attachments/assets/f7d536b2-e9a8-459f-916a-107c196ccca2" />
-
-
-
-
 
 ---
 
