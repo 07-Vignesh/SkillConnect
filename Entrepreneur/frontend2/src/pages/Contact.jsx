@@ -23,7 +23,7 @@ function Contact() {
   ];
 
   const social = [
-    { label: "LeetCode", href: "https://leetcode.com/u/7VigneshVicky/" },
+    { label: "LeetCode", href: "https://leetcode.com/u/7VikneshVicky/" },
     { label: "LinkedIn", href: "https://www.linkedin.com/in/viknesh-waran/" },
     { label: "GitHub",   href: "https://github.com/07-Vignesh" },
   ];

@@ -1,0 +1,20 @@
+# Use a lightweight Node.js image as our base
+FROM node:20-alpine
+
+# Set the working folder inside the container
+WORKDIR /app
+
+# Copy only package files first (for caching — explained below)
+COPY package*.json ./
+
+# Install dependencies inside the container
+RUN npm install --production
+
+# Now copy the rest of your code (server.js, routes/, config/, etc.)
+COPY . .
+
+# Tell Docker this container listens on port 5000
+EXPOSE 5000
+
+# The command that runs when the container starts
+CMD ["node", "server.js"]
