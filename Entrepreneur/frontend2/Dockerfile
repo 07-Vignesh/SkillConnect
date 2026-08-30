@@ -6,9 +6,18 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+# Accept build-time variables from Render
+ARG VITE_BACKEND_URL
+ARG VITE_CLERK_PUBLISHABLE_KEY
+
+# Make them available to the Vite build process
+ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
+
 RUN npm run build
 
-# Stage 2: serve the built files with nginx
+# Stage 2: serve with nginx
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
