@@ -21,6 +21,7 @@ import UserBookings from "./pages/UserBookings.jsx";
 import { SignIn, SignUp, UserButton } from "@clerk/clerk-react";
 import Navbar from "./components/Navbar.jsx";
 import ChatBot from "./pages/ChatBot.jsx";
+import ErrorPage from "./pages/ErrorPage.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -113,6 +114,7 @@ function App() {
         <Route path="/freelancers/:categoryName" element={<Flproductcard />} />
         <Route path="/freelancer/:id" element={<FreelancerDetails />} />
         <Route path="/freelancer/:id/dashboard" element={<FreelancerDashboard />} />
+        <Route path="*" element={<ErrorPage />} />
       </Routes>
     </Router>
   );
