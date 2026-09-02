@@ -81,18 +81,64 @@ export default function HomePage() {
     return () => window.removeEventListener("roleChanged", onRoleChanged);
   }, []);
 
+  const [chatSessionId] = useState(() => {
+    const key = "skillconnect_chat_session_id";
+    const existing = localStorage.getItem(key);
+    if (existing) return existing;
+    const nextId = `session-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    localStorage.setItem(key, nextId);
+    return nextId;
+  });
+
   const sendMessage = async (message) => {
     try {
-      const res = await fetch("https://unitoids.onrender.com/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": "Unitoids@2026", "x-session-id": "default" },
-        body: JSON.stringify({ message }),
-      });
-      if (!res.ok) throw new Error();
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY;
+      const model = import.meta.env.VITE_GEMINI_MODEL || "gemini-2.5-flash";
+
+      if (!apiKey) {
+        return { general_answer: "Gemini API key is missing. Add VITE_GEMINI_API_KEY to the frontend .env file." };
+      }
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [
+                {
+                  text:
+                    "You are the SkillConnect AI assistant for the freelancer marketplace app built by Vikneshwaran. Developer/owner: Vikneshwaran. Portfolio: vikneshwaran.dev. This app is a platform for hiring freelancers and connecting clients with technical and non-technical service providers in India. Help users with hiring, freelancer discovery, categories, pricing, bookings, support, login, signup, and profile tasks. Keep answers concise, helpful, and professional. When asked about the app creator or developer, mention that this app was developed by Vikneshwaran and the portfolio is vikneshwaran.dev."
+                }
+              ]
+            },
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: message }],
+              }
+            ]
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData?.error?.message || `Gemini API error (${res.status})`);
+      }
+
       const data = await res.json();
-      return { general_answer: data.general_answer || data.freelancer_answer || data.support_answer || data.answer || data.reply || "No response received" };
-    } catch {
-      return { general_answer: "Sorry, server error. Please try again." };
+      const answer =
+        data?.candidates?.[0]?.content?.parts
+          ?.map((part) => part.text)
+          .join("")
+          .trim() || "No response received";
+
+      return { general_answer: answer };
+    } catch (error) {
+      console.error("Gemini chat request error:", error);
+      return { general_answer: "Sorry, the AI service is currently unavailable. Please try again." };
     }
   };
 

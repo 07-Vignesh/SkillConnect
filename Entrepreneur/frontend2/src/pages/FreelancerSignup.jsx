@@ -55,7 +55,7 @@ const handleCategorySelect = (cat) => {
             <Button
               variant="outline"
               onClick={() => handleCategorySelect("Non-Technical")}
-              className="w-full border-white/20 text-white"
+              className="w-full border-white text-white hover:text-slate-200"
             >
               Non-Technical
             </Button>
