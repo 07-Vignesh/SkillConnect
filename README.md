@@ -6,6 +6,8 @@ SkillConnect is a modern AI-driven freelancing platform that connects **clients 
 - Vercel: [skill-connect-rosy.vercel.app](https://skill-connect-rosy.vercel.app/)
 - Self-hosted on AWS EC2 (Docker + nginx + SSL): [skillconnect-aws.vikneshwaran.dev](https://skillconnect-aws.vikneshwaran.dev/)
 
+🐳 **Dockerfiles:** [frontend](https://github.com/07-Vignesh/SkillConnect/blob/main/Entrepreneur/frontend2/Dockerfile) · [backend](https://github.com/07-Vignesh/SkillConnect/blob/main/Entrepreneur/backend/Dockerfile)
+
 ---
 
 ## Features
